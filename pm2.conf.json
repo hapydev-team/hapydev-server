@@ -1,0 +1,15 @@
+{
+  "apps": {
+    "name": "hapydev-api-open",
+    "script": "node src/main.js",
+    "watch": true,
+    "ignore_watch": [
+      "node_modules",
+      "log"
+    ],
+    "instances": 1,
+    "error_file": "log/err.log",
+    "out_file": "log/out.log",
+    "log_date_format": "YYY-MM-DD HH:mm:ss"
+  }
+}

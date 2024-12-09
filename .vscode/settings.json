@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "i18n-ally.localesPaths": "./src/locales/languages",
+  "i18n-ally.keystyle": "nested",
+  "liveServer.settings.port": 5501
+}

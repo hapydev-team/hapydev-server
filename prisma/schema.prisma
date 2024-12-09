@@ -1,0 +1,324 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//团队
+model Teams {
+  db_id        String      @id @db.Char(18)
+  team_id      String      @unique @db.Char(36) //团队id
+  name         String      @db.VarChar(50) //团队名称
+  description  String?     @db.Text //团队描述
+  owner_id     String      @db.Char(36) //团队所有人ID
+  product_type Int //团队版本类型  1.免费版free, 2.标准版standard，3.专业版professional 4.企业版(私有化部署)enterprise
+  expire_date  DateTime?   @db.Date //当前版本到期时间
+  create_time  DateTime    @db.DateTime() //创建时间
+  users        UserTeams[]
+  projects     Projects[]
+}
+
+//项目表
+model Projects {
+  db_id       String         @id @db.Char(18)
+  project_id  String         @unique @db.Char(36) //项目id
+  team_id     String?        @db.Char(36) //所属团队ID
+  bucket_id   String         @db.Char(20) //存储桶id
+  name        String         @db.VarChar(50) //项目名称
+  type        String?        @db.Char(20) //项目类型
+  description String?        @db.Text //项目描述
+  logo        String?        @db.VarChar(200) //项目Logo地址
+  create_time DateTime       @db.DateTime()
+  creater_id  String?        @db.Char(36) //创建人ID
+  users       UserProjects[]
+  team        Teams?         @relation(fields: [team_id], references: [team_id])
+}
+
+//Mock设置
+model ProjectMockConfigs {
+  project_id        String @id @db.Char(36) //项目id
+  mock_engine       Int    @db.TinyInt //Mock引擎 1.默认mock.js
+  default_mock_type Int    @db.TinyInt //默认Mock方式 1.智能mock优先  2.响应示例优先
+  use_cloud_mock    Int    @db.TinyInt //是否使用云端Mock      1.使用  -1 不使用
+  use_built_in      Int    @db.TinyInt //是否使用内置Mock规则      1.使用  -1 不使用
+}
+
+//接口功能设置
+model ProjectApisConfigs {
+  project_id     String @id @db.Char(36) //项目id
+  enabled_status String @db.Text //当前项目接口可选择的状态
+}
+
+//通知设置
+model ProjectWebhooks {
+  id          String   @id //唯一标识ID
+  project_id  String   @db.Char(36) //项目id
+  is_used     Int      @db.TinyInt //是否使用      1.使用  -1 不使用
+  name        String //通知名称
+  triggers    Json     @db.Json //触发事件
+  channel     String //通知渠道 wechat dingding feishu webhook jekins
+  create_time DateTime @db.DateTime() //创建时间
+  config      Json     @db.Json //通知设置 example {url:'xssd.com/hook?x1',sign:'xxxxx'}
+}
+
+//公共脚本
+model ProjectCommonScripts {
+  id          String   @id //唯一标识ID
+  project_id  String   @db.Char(36) //项目id
+  name        String //脚本名称
+  description String?  @db.Text //脚本描述
+  data        String?  @db.Text //脚本内容
+  create_time DateTime @db.DateTime() //创建时间
+}
+
+//参数描述库
+model ProjectParams {
+  id          String   @id //唯一标识ID
+  project_id  String   @db.Char(36) //项目id
+  name        String //参数名称
+  description String?  @db.Text //参数描述
+  type        Int      @db.UnsignedTinyInt //参数类型  1.内置  2.永久 3.临时
+  create_time DateTime @db.DateTime() //创建时间
+}
+
+//OpenAPI
+model UserOpenApis {
+  id               String    @id //唯一标识ID
+  uid              String    @db.Char(36) //用户ID
+  name             String //Token名称
+  token            String    @db.VarChar(250) //Token值
+  create_time      DateTime  @db.DateTime() //创建时间
+  expire_time      DateTime  @db.DateTime() //过期时间
+  last_invoke_time DateTime? @db.DateTime() //上次调用时间
+}
+
+//服务
+model ProjectServers {
+  //local_id   Int     @id @default(autoincrement())
+  server_id   String //服务ID
+  project_id  String   @db.Char(36) //项目id
+  name        String //服务名称
+  // prefix_url  String?  @db.Text //前置URL
+  create_time DateTime @db.DateTime() //创建时间
+
+  @@id(name: "project_server_id", [project_id, server_id])
+}
+
+//环境
+model ProjectEnviroments {
+  project_id String  @db.Char(36) //项目id
+  env_id     String //环境id
+  name       String //环境名称
+  auth_type  Int //可见类型  1.私有 2.团队内共享
+  creator_id String? @db.Char(36) //创建人ID
+  env_urls   Json?   @db.Json //服务设置
+  icon       Json?   @db.Json ///环境图标设置
+  variables  Json?   @db.Json //环境变量
+  sort       Int //排序值
+
+  @@id(name: "project_env_id", [project_id, env_id])
+}
+
+// //环境变量
+// model ProjectEnvVariables {
+//   project_id    String //项目id
+//   env_id        String //环境id
+//   name          String //变量名称
+//   value         String? //变量初始值
+//   current_value String? //变量当前值
+//   description   String? //变量描述
+
+//   @@id(name: "project_env_id", [project_id, env_id])
+// }
+
+//用户信息表
+model Users {
+  uid                String      @id @db.Char(36) //用户ID
+  avatar             String? //用户头像
+  nick_name          String //用户昵称
+  contact_number     String? //联系电话
+  location           String? //所在地区
+  profession         String? //从事职业
+  description        String?     @db.VarChar(300) //个人描述
+  phone              String? //登录手机号
+  email              String?     @db.VarChar(40) //密保邮箱
+  pwd_salt           String?     @db.Char(20) //盐
+  pwd_hash           String?     @db.Char(50) //password
+  create_time        DateTime?   @db.DateTime() //创建时间
+  last_login_time    DateTime?   @db.DateTime() //最后登录时间
+  last_activity_time DateTime?   @db.DateTime() //最后活动时间
+  err_login_count    Int //错误登录次数
+  default_team_id    String?     @db.Char(36) //用户默认团队ID
+  default_project_id String?     @db.Char(36) //用户默认项目ID
+  UserTeams          UserTeams[]
+}
+
+//用户认证授权
+model UserAuthorizations {
+  uid    String @db.Char(36) //用户ID
+  type   Int    @db.UnsignedTinyInt //1.微信wechat    2.github
+  config String //登录参数
+
+  @@id([uid, type])
+}
+
+//用户团队
+model UserTeams {
+  team_id   String   @db.Char(36) //团队id
+  uid       String   @db.Char(36) //用户ID
+  nick_name String? //用户在团队内的昵称
+  role      Int //用户权限  1.游客 visitor 2.开发者 developer 3.团队管理员 manager 4.团队所有者 owner
+  team      Teams?   @relation(fields: [team_id], references: [team_id])
+  join_time DateTime @db.DateTime() //加入时间
+  user      Users?   @relation(fields: [uid], references: [uid]) //用户表
+
+  @@id([team_id, uid])
+}
+
+model UserProjects {
+  project_id String   @db.Char(36) //项目id
+  uid        String   @db.Char(36) //用户ID
+  role       Int      @db.UnsignedTinyInt //项 目权限 0.禁止访问   1.执行权限   2.只写权限  4.只读权限  6.读写权限
+  project    Projects @relation(fields: [project_id], references: [project_id])
+  join_time  DateTime @db.DateTime() //加入时间
+
+  @@id([project_id, uid])
+}
+
+//通知消息
+model Notification {
+  db_id     Int      @id @default(autoincrement())
+  type      Int //消息类型1.系统消息  2.待办消息 3.系统弹窗消息
+  uid       String?  @db.Char(36) //接收人id
+  title     String   @db.VarChar(100) //消息名称
+  content   String   @db.VarChar(500) //消息内容
+  send_time DateTime @db.DateTime() //发送时间
+  link      String? //链接地址
+}
+
+//邀请用户
+model Invitation {
+  db_id       Int      @id @default(autoincrement())
+  creater_id  String //创建人id
+  token       String   @db.Char(50) //生成的链接token
+  team_id     String   @db.Char(36) //团队ID 
+  team_role   Int //团队权限 1.游客 visitor 2.开发者 developer 3.团队管理员 manager 
+  projects    Json     @db.Json //示例 [{id:111,role:1},{id:"22",role:33}] //项目权限   1.执行权限   2.只写权限  4.只读权限  6.读写权限
+  type        Int // 1.链接邀请  2.邮箱邀请
+  emails      String?  @db.VarChar(500) //被邀用户Email列表，多个用逗号空格或者换行符隔开
+  expire_time DateTime @db.DateTime() //过期时间
+}
+
+//已接受邀请的链接
+model JoinedInvitation {
+  token   String @db.Char(50) //生成的链接token
+  user_id String @db.Char(36) //已加入的用户ID
+
+  @@id(name: "token_user_id", [token, user_id])
+}
+
+//项目发布信息
+model Document {
+  project_id     String @id @db.Char(36)
+  state          Int    @db.TinyInt //发布状态 1.已发布  -1.未发布
+  publish_config Json   @db.Json //发布配置 
+  base_config    Json   @db.Json //文档基础配置 JSON格式
+}
+
+//分享信息
+model SharedDocuments {
+  db_id       String    @id @db.Char(18)
+  id          String    @unique @db.Char(36)
+  project_id  String    @db.Char(36) //所属项目ID
+  name        String    @db.VarChar(100) //分享名称
+  auth_type   Int       @db.TinyInt //1公开 2密码访问
+  expire_time DateTime? @db.DateTime() //过期时间
+  create_time DateTime  @db.DateTime() //创建时间
+  config      Json      @db.Json //分享配置
+}
+
+//接口信息
+model ApiBase {
+  db_id       String    @id @db.Char(18)
+  id          String    @unique @db.Char(36)
+  project_id  String    @db.Char(36) //所属项目ID
+  parent_id   String    @db.Char(36) //父级ID
+  name        String    @db.VarChar(100) //接口名称
+  data_type   String    @db.Char(20) //接口类型 api|folder|websocket|grpc|socket_client|socket_service
+  method      String?   @db.Char(15) //GET|POST|DELETE ..
+  url         String?   @db.VarChar(250) //请求地址
+  sort        Int       @db.SmallInt //排序值
+  etag        String    @db.Char(32) //data部分文件etag值
+  version     String?   @db.Char(36) //data部分文 文件版本id
+  create_time DateTime  @db.DateTime() //创建时间
+  update_time DateTime? @db.DateTime() //上次更新时间
+  creator_id  String    @db.Char(36) //创建人ID
+  updater_id  String?   @db.Char(36) //最后更新人ID
+  locker_id   String?   @db.Char(36) //锁定者ID
+  status      Int       @db.TinyInt //1.正常 2.已锁定  -1.逻辑删除 -2.物理删除
+}
+
+//数据模型
+model DataModel {
+  db_id       String    @id @db.Char(18)
+  id          String    @unique @db.Char(36)
+  project_id  String    @db.Char(36) //所属项目ID
+  parent_id   String    @db.Char(36) //父级ID
+  name        String    @db.VarChar(100) //模型名称
+  data_type   String    @db.Char(20) //类型 data_model|folder
+  sort        Int       @db.SmallInt //排序值
+  etag        String?   @db.Char(32) //data部分文件etag值
+  version     String?   @db.Char(36) //data部分文 文件版本id
+  create_time DateTime  @db.DateTime() //创建时间
+  update_time DateTime? @db.DateTime() //上次更新时间
+  creator_id  String    @db.Char(36) //创建人ID
+  updater_id  String?   @db.Char(36) //最后更新人ID
+  status      Int       @db.TinyInt //1.正常 2.已锁定  -1.逻辑删除 -2.物理删除
+  describe    String?   @db.VarChar(200) //模型简要描述
+}
+
+model Testing {
+  db_id       String    @id @db.Char(18)
+  test_id     String    @unique @db.Char(36) //测试用例唯一标识ID
+  project_id  String    @db.Char(36) //所属项目ID
+  parent_id   String    @db.Char(36) //父级ID
+  name        String    @db.VarChar(100) //接口名称
+  type        String    @db.Char(15) //数据类型 folder|test_case
+  sort        Int       @db.SmallInt //排序值
+  etag        String    @db.Char(32) //data部分文件etag值
+  version     String?   @db.Char(36) //data部分文 文件版本id
+  create_time DateTime  @db.DateTime() //创建时间
+  update_time DateTime? @db.DateTime() //上次更新时间
+  creator_id  String    @db.Char(36) //创建人ID
+  updater_id  String?   @db.Char(36) //最后更新人ID
+  status      Int       @db.TinyInt //1.正常   -1.逻辑删除 -2.物理删除
+}
+
+model TestingReports {
+  db_id               String    @id @db.Char(18)
+  project_id          String    @db.Char(36) //所属项目ID
+  test_id             String    @db.Char(36) //所属用例ID
+  report_id           String    @unique @db.Char(36) //测试报告唯一标识ID
+  name                String    @db.VarChar(100) //测试报告名称
+  progress            Float     @db.Double //测试进度
+  // results     Json      @db.Json //测试数据详情
+  status              String    @db.Char(20) //完成状态
+  user_id             String    @db.Char(36) //创建人ID
+  user_name           String    @db.VarChar(32) //创建人名称
+  env_id              String    @db.VarChar(36) //执行环境
+  env_name            String    @db.VarChar(36) //环境名称
+  cost_time           Float     @db.Double //花费时间
+  create_time         DateTime  @db.DateTime() //创建时间
+  finish_time         DateTime? @db.DateTime() //运行结束时间
+  api_success_rate    Float     @db.Double //接口通过率
+  assert_success_rate Float     @db.Double //断言通过率
+}
