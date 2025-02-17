@@ -1,11 +1,11 @@
-# Hapydev-api 是Hapydev的后端API服务
+# Hapydev-server 是Hapydev的后端API服务
 
-通过Hapydev-api，您可以对Hapydev中产生的数据进行集中存储，考虑到服务扩展性，我们支持将第三方功能通过webapi的方式集成到项目中。
+通过Hapydev-server，您可以对Hapydev中产生的数据进行集中存储，考虑到服务扩展性，我们支持将第三方功能通过webapi的方式集成到项目中。
 
 ### 项目依赖
- - MySQL 用户存储接口基本数据结构
- - Redis 用户存储用户会话信息
- - MinIO 用于调取历史版本数据，及支持多分支数据管理
+
+- MySQL 用户存储接口基本数据结构
+- Redis 用户存储用户会话信息
 
 ### 安装方式
 
@@ -16,7 +16,7 @@ git clone git@github.com:hapydev-team/hapydev-server.git
 cd hapydev-server
 ```
 
-修改.env文件，手动配置好MySQL，Redis，MinIO，短信api，邮件api等环境变量后，继续运行下方脚本
+修改.env文件，手动配置好MySQL，Redis，短信api，邮件api，静态文件存放路径等环境变量后，继续运行下方脚本
 
 ```bash
  npm install
@@ -35,21 +35,18 @@ docker run -d -p 6002:6002  hapydev/hapydev-api
 
 ### 环境变量
 
-| 变量名称            | 变量描述                   | 示例参数                                   |
-| ------------------- | -------------------------- | ------------------------------------------ |
-| DATABASE_URL        | MySQL数据库地址            | "mysql://root:pwd@localhost:3306/hapydev"  |
-| REDIS_URL           | redis服务地址              | "redis://localhost:6379/0"                 |
-| MINIO_ENDPOINT      | MinIO服务地址              | "localhost"                                |
-| MINIO_ACCESS_KEY    | MinIO密钥                  | "1BLRKoXioW4MUliLtRmm"                     |
-| MINIO_SECRET_KEY    | MinIO密钥密码              | "vmWWcN6YpIWPYAY9n31xPvn7TyNsOuAMUN2f0Kca" |
-| MINIO_PORT          | MinIO端口号                | "9000"                                     |
-| JWT_ACCESS_SECRET   | Jwt token 密钥             | "zf7vWzZjmbvRC7DmKx5s326DpdV23g50"         |
-| JWT_ACCESS_EXPIRES  | jwt token 过期时间         | "30m"                                      |
-| JWT_REFRESH_SECRET  | jwt refresh token 密钥     | "xasdnkd&ZeMsOisLxsd3e0HgsTsxshjd"         |
-| JWT_REFRESH_EXPIRES | jwt refresh token过期时间  | "30d"                                      |
-| APP_BASE_URL        | Hapydev工具Web方式访问地址 | 'https://app.hapydev.com'                  |
-| EMAIL_SERVICE_API   | 邮件服务地址               | 'http://localhost:7001/email/send'         |
-| SMS_SERVICE_API     | 短信服务地址               | 'http://localhost:7001/sms/send'           |
+| 变量名称            | 变量描述                   | 示例参数                                  |
+| ------------------- | -------------------------- | ----------------------------------------- |
+| DATABASE_URL        | MySQL数据库地址            | "mysql://root:pwd@localhost:3306/hapydev" |
+| REDIS_URL           | redis服务地址              | "redis://localhost:6379/0"                |
+| JWT_ACCESS_SECRET   | Jwt token 密钥             | "zf7vWzZjmbvRC7DmKx5s326DpdV23g50"        |
+| JWT_ACCESS_EXPIRES  | jwt token 过期时间         | "30m"                                     |
+| JWT_REFRESH_SECRET  | jwt refresh token 密钥     | "xasdnkd&ZeMsOisLxsd3e0HgsTsxshjd"        |
+| JWT_REFRESH_EXPIRES | jwt refresh token过期时间  | "30d"                                     |
+| APP_BASE_URL        | Hapydev工具Web方式访问地址 | 'https://app.hapydev.com'                 |
+| EMAIL_SERVICE_API   | 邮件服务地址               | 'http://localhost:7001/email/send'        |
+| SMS_SERVICE_API     | 短信服务地址               | 'http://localhost:7001/sms/send'          |
+| FILES_ROOT_PATH     | 静态文件存放路径           | '/usr/local/data'                         |
 
 ### Bug 和需求反馈
 

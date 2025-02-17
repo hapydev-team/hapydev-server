@@ -20,7 +20,7 @@ model Teams {
   name         String      @db.VarChar(50) //团队名称
   description  String?     @db.Text //团队描述
   owner_id     String      @db.Char(36) //团队所有人ID
-  product_type Int //团队版本类型  1.免费版free, 2.标准版standard，3.专业版professional 4.企业版(私有化部署)enterprise
+  product_type Int //团队版本类型  
   expire_date  DateTime?   @db.Date //当前版本到期时间
   create_time  DateTime    @db.DateTime() //创建时间
   users        UserTeams[]
@@ -128,18 +128,6 @@ model ProjectEnviroments {
   @@id(name: "project_env_id", [project_id, env_id])
 }
 
-// //环境变量
-// model ProjectEnvVariables {
-//   project_id    String //项目id
-//   env_id        String //环境id
-//   name          String //变量名称
-//   value         String? //变量初始值
-//   current_value String? //变量当前值
-//   description   String? //变量描述
-
-//   @@id(name: "project_env_id", [project_id, env_id])
-// }
-
 //用户信息表
 model Users {
   uid                String      @id @db.Char(36) //用户ID
@@ -159,6 +147,8 @@ model Users {
   err_login_count    Int //错误登录次数
   default_team_id    String?     @db.Char(36) //用户默认团队ID
   default_project_id String?     @db.Char(36) //用户默认项目ID
+  create_ip          String?     @db.Char(128) // 注册IP
+  last_ip            String?     @db.Char(128) // 最后登录IP
   UserTeams          UserTeams[]
 }
 
