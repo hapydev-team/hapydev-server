@@ -1,6 +1,6 @@
 {
-  "name": "hapydev-api-open",
-  "version": "1.0.0",
+  "name": "hapydev-server",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -77,12 +77,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hapydev-team/hapydev-api-open.git"
+    "url": "git+https://github.com/hapydev-team/hapydev-server.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hapydev-team/hapydev-api-open/issues"
+    "url": "https://github.com/hapydev-team/hapydev-server/issues"
   },
-  "homepage": "https://github.com/hapydev-team/hapydev-api-open#readme"
+  "homepage": "https://github.com/hapydev-team/hapydev-server#readme"
 }
